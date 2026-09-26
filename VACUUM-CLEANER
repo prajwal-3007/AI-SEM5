@@ -1,30 +1,33 @@
-# Vacuum Cleaner Problem
+roomA = input("Enter status of Room A (dirty/clean): ").lower()
+roomB = input("Enter status of Room B (dirty/clean): ").lower()
 
-room = {
-    "A": "Dirty",
-    "B": "Dirty"
-}
+position = input("Enter vacuum position (A/B): ").upper()
 
-position = "A"
+while roomA == "dirty" or roomB == "dirty":
 
-while True:
-    print("\nCurrent position:", position)
-    print("Room A:", room["A"])
-    print("Room B:", room["B"])
+    if position == "A":
 
-    if room[position] == "Dirty":
-        print("Action: Clean")
-        room[position] = "Clean"
+        if roomA == "dirty":
+            print("Room A is Dirty")
+            print("Cleaning Room A...")
+            roomA = "clean"
+
+        else:
+            print("Room A is Clean")
+            print("Moving to Room B...")
+            position = "B"
 
     else:
-        if position == "A":
-            print("Action: Move to B")
-            position = "B"
-        else:
-            print("Action: Move to A")
 
+        if roomB == "dirty":
+            print("Room B is Dirty")
+            print("Cleaning Room B...")
+            roomB = "clean"
+
+        else:
+            print("Room B is Clean")
+            print("Moving to Room A...")
             position = "A"
 
-    if room["A"] == "Clean" and room["B"] == "Clean":
-        print("\nBoth rooms are clean!")
-        break
+print("Both rooms are Clean!")
+print("Vacuum Cleaner stopped.")
