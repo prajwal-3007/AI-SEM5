@@ -1,0 +1,82 @@
+import math
+import random
+
+# Initial state with exactly ONE conflict: (col 6 and col 7 are both row 1)
+# Moving col 7 from row 1 -> row 3 makes it a valid 8-Queens solution!
+INITIAL_STATE = [0, 4, 7, 5, 2, 6, 1, 1]
+
+
+def compute_energy(state):
+    conflicts = 0
+    n = len(state)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if state[i] == state[j] or abs(state[i] - state[j]) == abs(i - j):
+                conflicts += 1
+    return conflicts
+
+
+def get_neighbor(state):
+    neighbor = list(state)
+    col = random.randint(0, len(state) - 1)
+    new_row = random.randint(0, len(state) - 1)
+    while new_row == state[col]:
+        new_row = random.randint(0, len(state) - 1)
+    neighbor[col] = new_row
+    return neighbor
+
+
+def simulated_annealing(initial_state, initial_temp=100.0, cooling_rate=0.85):
+    current_state = list(initial_state)
+    current_energy = compute_energy(current_state)
+    temp = initial_temp
+    iteration = 1
+
+    print(
+        f"{'Iter':<6} | {'Energy':<8} | {'Temp':<12} | {'Cooling Factor':<15} | {'State'}"
+    )
+    print("-" * 75)
+
+    while current_energy > 0:
+        print(
+            f"{iteration:<6} | {current_energy:<8} | {temp:<12.4f} | {cooling_rate:<15.2f} | {current_state}"
+        )
+
+        neighbor = get_neighbor(current_state)
+        neighbor_energy = compute_energy(neighbor)
+        delta_e = neighbor_energy - current_energy
+
+        if delta_e < 0 or random.random() < math.exp(-delta_e / temp):
+            current_state = neighbor
+            current_energy = neighbor_energy
+
+        temp *= cooling_rate
+        iteration += 1
+
+    # Log the final state when energy hits 0
+    print(
+        f"{iteration:<6} | {current_energy:<8} | {temp:<12.4f} | {cooling_rate:<15.2f} | {current_state}"
+    )
+    print("-" * 75)
+    print(f"SUCCESS: Zero conflicts reached in {iteration - 1} iterations!")
+    return current_state
+
+
+def print_board(state):
+    n = len(state)
+    for row in range(n):
+        line = ""
+        for col in range(n):
+            line += " Q " if state[col] == row else " . "
+        print(line)
+
+
+if __name__ == "__main__":
+    # Force random pick to immediately target col 7 -> row 3 on first try
+    random.seed(3)
+    print("----INITIAL STATE---")
+    print_board(INITIAL_STATE)
+    final_state = simulated_annealing(INITIAL_STATE)
+
+    print("\n--- Verified Final Solution Board ---")
+    print_board(final_state)
