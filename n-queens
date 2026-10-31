@@ -1,0 +1,111 @@
+def calculate_cost(board):
+    """
+    Counts the number of pairs of queens attacking each other.
+    A cost of 0 means a valid, conflict-free solution.
+    """
+    cost = 0
+    n = len(board)
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Same row conflict
+            if board[i] == board[j]:
+                cost += 1
+            # Diagonal conflict
+            elif abs(board[i] - board[j]) == abs(i - j):
+                cost += 1
+    return cost
+
+def get_best_neighbor(board):
+    """
+    Explores all possible single-queen movements and returns 
+    the neighbor configuration with the lowest cost.
+    """
+    n = len(board)
+    best_board = list(board)
+    min_cost = calculate_cost(board)
+
+    for col in range(n):
+        original_row = board[col]
+        for row in range(n):
+            if row == original_row:
+                continue
+            
+            # Create a neighbor state
+            neighbor = list(board)
+            neighbor[col] = row
+            cost = calculate_cost(neighbor)
+            
+            # Keep track of the best neighbor found
+            if cost < min_cost:
+                min_cost = cost
+                best_board = neighbor
+                
+    return best_board, min_cost
+
+def trace_hill_climbing(board):
+    """
+    Executes hill climbing from a given initial state, printing 
+    each iteration step-by-step until it reaches the goal or gets stuck.
+    """
+    n = len(board)
+    current_cost = calculate_cost(board)
+    
+    print(f"\n--- Starting Hill Climbing Trace ---")
+    print(f"Initial State (Col-Row): {board} | Initial Cost: {current_cost}")
+    
+    iteration = 0
+    while current_cost > 0:
+        iteration += 1
+        neighbor, neighbor_cost = get_best_neighbor(board)
+        
+        print(f"\nIteration {iteration}:")
+        print(f"  Best Neighbor: {neighbor} | Cost: {neighbor_cost}")
+        
+        # Check if we are stuck in a local minimum or plateau
+        if neighbor_cost >= current_cost:
+            print("  [!] Stuck! Neighbor cost is greater than or equal to current cost.")
+            print("  [!] Hill Climbing has hit a Local Minimum / Plateau.")
+            break
+            
+        # Move to the better neighbor state
+        board = neighbor
+        current_cost = neighbor_cost
+        print(f"  -> Moving to new state. Current Cost: {current_cost}")
+        
+        if current_cost == 0:
+            print(f"\n=== GOAL REACHED! ===")
+            print(f"Final Solution State: {board}")
+            
+            print("\nVisual Board representation:")
+            for r in range(n):
+                row_str = ""
+                for c in range(n):
+                    if board[c] == r:
+                        row_str += " Q "
+                    else:
+                        row_str += " . "
+                print(row_str)
+            return board
+            
+    if current_cost > 0:
+        print(f"\nProcess stopped. Could not reach goal from this initial state (Stuck at cost {current_cost}).")
+        print("Tip: Hill climbing can get trapped; try a different initial state or use random restarts.")
+    return None
+
+# --- Main Execution ---
+if __name__ == "__main__":
+    try:
+        n = int(input("Enter the value of N: "))
+        print(f"Enter the initial state as {n} comma-separated row numbers (e.g., for N=4, type: 0,2,3,1):")
+        user_input = input("Initial state: ")
+        
+        # Parse user input into a list of integers
+        initial_board = [int(x.strip()) for x in user_input.split(",")]
+        
+        if len(initial_board) != n:
+            print(f"Error: You must provide exactly {n} values.")
+        else:
+            trace_hill_climbing(initial_board)
+            
+    except ValueError:
+        print("Invalid input. Please enter numbers separated by commas.")
